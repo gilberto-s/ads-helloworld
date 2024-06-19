@@ -1,0 +1,8 @@
+stages:
+  - test
+
+hello_world_job:
+  stage: test
+  script:
+    - python3 hello.py
+
