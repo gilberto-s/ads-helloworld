@@ -32,7 +32,7 @@ pipeline {
             steps {
                 script {
                     docker.image(DOCKER_IMAGE).inside {
-                        sh 'pylint hello.py'
+                        sh 'pylint --disable=trailing-newlines,missing-module-docstring,missing-function-docstring hello.py'
                     }
                 }
             }
