@@ -3,12 +3,13 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'myapp:latest'
+	GHCR_REPO = 'ghcr.io/gilberto-s/ads-helloworld'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/gilberto-s/ads-helloworld.git'
+               git branch: 'main', url:'https://github.com/gilberto-s/ads-helloworld.git'
             }
         }
         stage('Build') {
@@ -39,8 +40,14 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        docker.image(DOCKER_IMAGE).push('latest')
+                    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                        sh '''
+                        echo $GITHUB_TOKEN | docker login ghcr.io -u gilberto-s --password-stdin
+                        docker tag myapp:latest $GHCR_REPO:$BUILD_NUMBER
+                        docker push $GHCR_REPO:$BUILD_NUMBER
+                        docker tag myapp:latest $GHCR_REPO:latest
+                        docker push $GHCR_REPO:latest
+                        '''
                     }
                 }
             }
